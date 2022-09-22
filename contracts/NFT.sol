@@ -152,10 +152,10 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
             if (currentTokenOwner == _owner) {
                 ownedTokenIds[ownedTokenIndex] = currentTokenId;
 
-                ownedTokenIndex++;
+                unchecked {++ownedTokenIndex;}
             }
 
-            currentTokenId++;
+            unchecked {++currentTokenId;}
         }
 
         return ownedTokenIds;
