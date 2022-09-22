@@ -10,7 +10,7 @@ import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKEquipRenderUtils.sol";
 
 interface IWhitelistUtils {
     function isPresaleOn() external view returns(bool);
-    function presaleCheck(bytes32[] memory proof, address _sender, bool _freeMint) external;
+    function presaleCheck(uint256 numberOfTokens, bytes32[] memory proof, address _sender, bool _freeMint) external;
 }
 
 contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
@@ -86,11 +86,11 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
         }
     }
 
-    function presaleMint(bytes32[] memory proof, bool _freeMint) public payable nonReentrant saleIsOpen {
+    function presaleMint(uint256 numberOfTokens, bytes32[] memory proof, bool _freeMint) public payable nonReentrant saleIsOpen {
         if(!_freeMint){
             require(msg.value >= mintPrice(), "Not enough ether sent.");
         }
-        IWhitelistUtils(whitelistUtils).presaleCheck(proof, _msgSender(), _freeMint);
+        IWhitelistUtils(whitelistUtils).presaleCheck(numberOfTokens, proof, _msgSender(), _freeMint);
         
         _tokenIdTracker.increment();
         uint256 currentToken = _tokenIdTracker.current();

@@ -10,15 +10,19 @@ contract WhitelistUtils is Ownable, ReentrancyGuard {
     address public nftContract;
 
     bool public preSale;
-    bool public preSaleT;
+    bool public preSaleSecondary;
 
     bytes32 private root;
-    bytes32 private rootT;
+    bytes32 private rootSecondary;
     bytes32 private rootFreeMint;
 
-    mapping (address => bool) preSaleClaimed;
-    mapping (address => bool) preSaleTClaimed;
-    mapping (address => bool) freeMintClaimed;
+    uint256 public whitelistMintLimit = 1;
+    uint256 public whitelistSecondaryMintLimit = 1;
+    uint256 public freeMintLimit = 1;
+
+    mapping (address=>uint256) whitelistClaimed;
+    mapping (address=>uint256) whitelistSecondaryClaimed;
+    mapping (address=>uint256) freeMintClaimed;
 
     constructor(address _nftContract){
         setNFTContract(_nftContract);
@@ -34,8 +38,8 @@ contract WhitelistUtils is Ownable, ReentrancyGuard {
         return MerkleProof.verify(proof, root, leaf);
     }
 
-    function isValidT(bytes32[] memory proof, bytes32 leaf) public view returns(bool) {
-        return MerkleProof.verify(proof, rootT, leaf);
+    function isValidSecondary(bytes32[] memory proof, bytes32 leaf) public view returns(bool) {
+        return MerkleProof.verify(proof, rootSecondary, leaf);
     }
 
     function isValidFreeMint(bytes32[] memory proof, bytes32 leaf) public view returns(bool) {
@@ -46,8 +50,8 @@ contract WhitelistUtils is Ownable, ReentrancyGuard {
         root = _root;
     }
 
-    function setRootT(bytes32 _root) external onlyOwner{
-        rootT = _root;
+    function setRootSecondary(bytes32 _root) external onlyOwner{
+        rootSecondary = _root;
     }
 
     function setRootFreeMint(bytes32 _root) external onlyOwner{
@@ -59,20 +63,8 @@ contract WhitelistUtils is Ownable, ReentrancyGuard {
     // --------------------------------------------------- //
 
     //getters
-    function isPresaleClaimed(address _address) public view returns(bool){
-        return preSaleClaimed[_address];
-    }
-
-    function isPresaleTClaimed(address _address) public view returns(bool){
-        return preSaleTClaimed[_address];
-    }
-
-    function isFreeMintClaimed(address _address) public view returns(bool){
-        return freeMintClaimed[_address];
-    }
-
     function isPresaleOn() external view returns(bool){
-        if(preSale || preSaleT){
+        if(preSale || preSaleSecondary){
             return true;
         }
         else{
@@ -82,71 +74,66 @@ contract WhitelistUtils is Ownable, ReentrancyGuard {
 
     // setters
 
-    function setPresaleClaimed(address _address) private {
-        preSaleClaimed[_address] = true;
+    function setWhitelistMintLimit(uint256 _limit) external onlyOwner{
+        whitelistMintLimit = _limit;
     }
 
-    function setPresaleTClaimed(address _address) private {
-        preSaleTClaimed[_address] = true;
+    function setWhitelistSecondaryMintLimit(uint256 _limit) external onlyOwner{
+        whitelistSecondaryMintLimit = _limit;
     }
 
-    function setFreeMintClaimed(address _address) private {
-        freeMintClaimed[_address] = true;
+    function setFreeMintClaimed(uint256 _limit) external onlyOwner {
+        freeMintLimit = _limit;
     }
 
-    function setPresaleOn(bool _preSale) external onlyOwner{
-        if(_preSale){
+    function setPresaleOn(bool _preSalePrimary) external onlyOwner{
+        if(_preSalePrimary){
             preSale = true;
-            if(preSaleT) {
-                preSaleT = false;
-            }
+            preSaleSecondary = false;
         }
         else {
-            if(preSale) {
-                preSale = false;
-            }
-            preSaleT = true;
+            preSale = false;
+            preSaleSecondary = true;
         }
     }
 
     function setPresaleOff() external onlyOwner {
         preSale = false;
-        preSaleT = false;
+        preSaleSecondary = false;
     }
     
     // --------------------------------------------------- //
 
     // ------------------- MINT -------------------------- //
-    function presaleCheck(bytes32[] memory proof, address _sender, bool _freeMint) external{
+    function presaleCheck(uint256 numberOfTokens, bytes32[] memory proof, address _sender, bool _freeMint) external{
+        require(msg.sender == owner() || msg.sender == nftContract, "Not Authorised.");
         if(_freeMint){
-            freeMintCheck(proof, _sender);
+            _freeMintCheck(numberOfTokens, proof, _sender);
         }
         else{
-            whitelistMintCheck(proof, _sender);
+            _whitelistMintCheck(numberOfTokens, proof, _sender);
         }
     }
 
 
-    function freeMintCheck(bytes32[] memory proof, address _sender) private {
-        require(msg.sender == owner() || msg.sender == nftContract, "Not Authorised.");
-        require(isValidFreeMint(proof, keccak256(abi.encodePacked(_sender))), "YOU ARE NOT A CHOSEN ONE");
-        require(!isFreeMintClaimed(_sender), "You have already claimed.");
-        setFreeMintClaimed(_sender);
-    }
+    function _whitelistMintCheck(uint256 numberOfTokens, bytes32[] memory proof, address _sender) private{
+        require(preSaleSecondary || preSale, "THE GATES ARE CLOSED");
 
-    function whitelistMintCheck(bytes32[] memory proof, address _sender) private{
-        require(msg.sender == owner() || msg.sender == nftContract, "Not Authorised.");
-        require(preSaleT || preSale, "THE GATES ARE CLOSED");
-
-        if(preSaleT){
-            require(isValidT(proof, keccak256(abi.encodePacked(_sender))), "THE GATES ONLY OPEN FOR THE CHOSEN ONES");
-            require(!isPresaleTClaimed(_sender), "You have already claimed");
-            setPresaleTClaimed(_sender);
+        if(preSaleSecondary){
+            require(isValidSecondary(proof, keccak256(abi.encodePacked(_sender))), "THE GATES ONLY OPEN FOR THE CHOSEN ONES");
+            require(whitelistSecondaryClaimed[_sender] + numberOfTokens <= whitelistSecondaryMintLimit, "You have reached whitelist mint limit");
+            whitelistSecondaryClaimed[_sender] += numberOfTokens;
         }
         else if (preSale){
             require(isValid(proof, keccak256(abi.encodePacked(_sender))), "THE GATES ONLY OPEN FOR THE CHOSEN ONES");
-            require(!isPresaleClaimed(_sender), "You have already claimed");
-            setPresaleClaimed(_sender);
+            require(whitelistClaimed[_sender] + numberOfTokens <= whitelistMintLimit, "You have reached whitelist mint limit");
+            whitelistClaimed[_sender] += numberOfTokens;
         }
+    }
+
+    function _freeMintCheck(uint256 numberOfTokens, bytes32[] memory proof, address _sender) private {
+        require(isValidFreeMint(proof, keccak256(abi.encodePacked(_sender))), "YOU ARE NOT A CHOSEN ONE");
+        require(freeMintClaimed[_sender] + numberOfTokens <= freeMintLimit, "You have already claimed");
+        freeMintClaimed[_sender] += numberOfTokens;
     }
 }
