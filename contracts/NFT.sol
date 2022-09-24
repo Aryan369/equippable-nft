@@ -137,7 +137,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     // ---------------- WALLET OF OWNER ------------------------- //
 
     function walletOfOwner(address _owner)
-    public
+    external
     view
     returns (uint256[] memory)
     {
