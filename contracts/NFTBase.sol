@@ -3,19 +3,9 @@
 pragma solidity ^0.8.15;
 
 import "@rmrk-team/evm-contracts/contracts/RMRK/base/RMRKBaseStorage.sol";
-import "@rmrk-team/evm-contracts/contracts/RMRK/access/OwnableLock.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-/**
- * @dev Contract for storing 'base' elements of NFTs to be accessed
- * by instances of RMRKResource implementing contracts. This default
- * implementation includes an OwnableLock dependency, which allows
- * the deployer to freeze the state of the base contract.
- *
- * In addition, this implementation treats the base registry as an
- * append-only ledger, so
- */
-
-contract NFTBase is OwnableLock, RMRKBaseStorage {
+contract NFTBase is Ownable, RMRKBaseStorage {
     
     constructor(string memory symbol_, string memory type__)
         RMRKBaseStorage(symbol_, type__)
@@ -24,7 +14,6 @@ contract NFTBase is OwnableLock, RMRKBaseStorage {
     function addPart(IntakeStruct calldata intakeStruct)
         external
         onlyOwner
-        notLocked
     {
         _addPart(intakeStruct);
     }
@@ -32,7 +21,6 @@ contract NFTBase is OwnableLock, RMRKBaseStorage {
     function addPartList(IntakeStruct[] calldata intakeStructs)
         external
         onlyOwner
-        notLocked
     {
         _addPartList(intakeStructs);
     }
