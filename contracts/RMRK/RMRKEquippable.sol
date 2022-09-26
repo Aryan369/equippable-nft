@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-//Generally all interactions should propagate downstream
-
 pragma solidity ^0.8.15;
 
 import "@rmrk-team/evm-contracts/contracts/RMRK/base/IRMRKBaseStorage.sol";
