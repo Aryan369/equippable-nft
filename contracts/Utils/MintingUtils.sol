@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.15;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
-pragma solidity ^0.8.15;
 
 contract MintingUtils is Ownable {
     using Counters for Counters.Counter;
