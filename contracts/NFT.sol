@@ -168,4 +168,6 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
         whitelistUtils = _address;
     }
     // ---------------------------------------------------------- //
+
+    receive() external payable {}
 }
