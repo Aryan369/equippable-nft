@@ -3,15 +3,11 @@
 pragma solidity ^0.8.16;
 
 import "./Utils/MintingUtils.sol";
+import "./Utils/IWhitelistUtils.sol";
 import "./RMRK/RMRKEquippable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKEquipRenderUtils.sol";
 /* import "hardhat/console.sol"; */
-
-interface IWhitelistUtils {
-    function isPresaleOn() external view returns(bool);
-    function presaleCheck(uint256 numberOfTokens, bytes32[] memory proof, address _sender, bool _freeMint) external;
-}
 
 contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -21,7 +17,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
 
     bool public reservedNFTMinted;
 
-    address public whitelistUtils;
+    IWhitelistUtils public whitelistUtils;
 
     constructor(
         string memory name,
