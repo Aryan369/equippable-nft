@@ -28,7 +28,8 @@ const config: HardhatUserConfig = {
     rinkeby: {
       url: "https://rinkeby.infura.io/v3/53000910bf484824842024352cee1eac",
       chainId: 4,
-      accounts: [PRIVATE_KEY]
+      accounts: [PRIVATE_KEY],
+      gas: 10000000
     }
   }
 };
