@@ -69,16 +69,14 @@ async function deployContracts(): Promise<
     "KAN",
     1000,
     pricePerMint,
-    "fallbackURI",
-    baseWhitelistUtils.address
+    "fallbackURI"
   );
   const gem: NFT = await contractFactory.deploy(
     "Gem",
     "GM",
     3000,
     pricePerMint,
-    "gemFallbackURI",
-    gemWhitelistUtils.address
+    "gemFallbackURI"
   );
   const base: NFTBase = await baseFactory.deploy("KB", "svg");
   const views: RMRKEquipRenderUtils = await viewsFactory.deploy();
@@ -91,9 +89,13 @@ async function deployContracts(): Promise<
     `Sample contracts deployed to ${kanaria.address}, ${gem.address} and ${base.address}`
   );
 
+  await kanaria.setWhitelistUtils(baseWhitelistUtils.address);
+  await gem.setWhitelistUtils(gemWhitelistUtils.address);
+  console.log(`(NFT Contract) Whilist Utils address set.`);
+
   await baseWhitelistUtils.setNFTContract(kanaria.address);
   await gemWhitelistUtils.setNFTContract(gem.address);
-  console.log(`Whilist Utils NFT Contract address set.`);
+  console.log(`(Whilist Utils) NFT Contract address set.`);
   
   return [kanaria, gem, base, views];
 }

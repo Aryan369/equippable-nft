@@ -24,16 +24,14 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
         string memory symbol,
         uint256 maxSupply,
         uint256 mintPrice,
-        string memory _fallbackURI,
-        IWhitelistUtils _whitelistUtilsContract
+        string memory _fallbackURI
     ) RMRKEquippable(name, symbol) MintingUtils(maxSupply, mintPrice) {
         _setFallbackURI(_fallbackURI);
-        setWhitelistUtils(_whitelistUtilsContract);
     }
     // --------------- MINT -------------------------- //
 
     modifier mintReq (uint256 numberOfTokens) {
-        require(!IWhitelistUtils(whitelistUtils).isPresaleOn(), "Presale is going on");
+        if(whitelistUtils != IWhitelistUtils(address(0))) {require(!IWhitelistUtils(whitelistUtils).isPresaleOn(), "Presale is going on");}
         if(!reservedNFTMinted){
             require((totalSupply() + numberOfTokens) <= (maxSupply() - RESERVED_NFT), "Not enough tokens left.");
         }
@@ -83,6 +81,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     }
 
     function presaleMint(uint256 numberOfTokens, bytes32[] memory proof, bool _freeMint) public payable nonReentrant saleIsOpen {
+        require(whitelistUtils == IWhitelistUtils(address(0)), "Whitelist Utils not set");
         if(!_freeMint){
             require(msg.value >= mintPrice(), "Not enough ether sent.");
         }
