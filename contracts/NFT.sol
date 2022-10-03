@@ -81,7 +81,6 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     }
 
     function presaleMint(uint256 numberOfTokens, bytes32[] memory proof, bool _freeMint) public payable nonReentrant saleIsOpen {
-        require(whitelistUtils == IWhitelistUtils(address(0)), "Whitelist Utils not set");
         if(!_freeMint){
             require(msg.value >= mintPrice(), "Not enough ether sent.");
         }
