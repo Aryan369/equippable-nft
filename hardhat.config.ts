@@ -24,6 +24,11 @@ const config: HardhatUserConfig = {
       url: "https://matic-mumbai.chainstacklabs.com",
       chainId: 80001,
       accounts: [PRIVATE_KEY]
+    },
+    rinkeby: {
+      url: "https://rinkeby.infura.io/v3/53000910bf484824842024352cee1eac",
+      chainId: 4,
+      accounts: [PRIVATE_KEY]
     }
   }
 };
