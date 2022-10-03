@@ -25,7 +25,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
         uint256 maxSupply,
         uint256 mintPrice,
         string memory _fallbackURI,
-        address _whitelistUtilsContract
+        IWhitelistUtils _whitelistUtilsContract
     ) RMRKEquippable(name, symbol) MintingUtils(maxSupply, mintPrice) {
         _setFallbackURI(_fallbackURI);
         setWhitelistUtils(_whitelistUtilsContract);
@@ -160,7 +160,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     // ------------------------------------------------ //
 
     // ---------------- WHITELIST UTILS ------------------------- //
-    function setWhitelistUtils(address _address) public onlyOwner{
+    function setWhitelistUtils(IWhitelistUtils _address) public onlyOwner{
         whitelistUtils = _address;
     }
     // ---------------------------------------------------------- //
