@@ -275,7 +275,7 @@ async function addKanariaResources(
       equippableRefId: 0, // Only used for resources meant to equip into others
       baseAddress: baseAddress, // Since we're using parts, we must define the base
     //   metadataURI: "ipfs://bafkreigg5xbvr4hrpldkki6w62f2ssme5thly3yvyp7ie3uxkrpihz2wsm",
-      metadataURI: "meta1.json", //metadata of the placeholder image and with properties (attributes)
+      metadataURI: "meta1.json", //metadata of the placeholder image and with properties (attributes). Identified as composable if mimeType property present.
     },
     [1, 3, 5, 7], // We're using first background, head, body and wings
     [9, 10, 11] // We state that this can receive the 3 slot parts for gems
