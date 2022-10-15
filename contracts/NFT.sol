@@ -44,7 +44,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     }
 
     function reserveNFT() external onlyOwner {
-      if (reservedNFTMinted) revert ("Reserved NFTs already minted");
+    //   if (reservedNFTMinted) revert ("Reserved NFTs already minted");
       for(uint i = 0; i< RESERVED_NFT;) {
           _tokenIdTracker.increment();
           uint256 currentToken = _tokenIdTracker.current();
