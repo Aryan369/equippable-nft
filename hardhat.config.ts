@@ -18,7 +18,8 @@ const config: HardhatUserConfig = {
     godwoken_testnet: {
       url: "https://godwoken-testnet-v1.ckbapp.dev",
       chainId: 71401,
-      accounts: [PRIVATE_KEY]
+      accounts: [PRIVATE_KEY],
+      gas: 10000000
     },
     mumbai: {
       url: "https://matic-mumbai.chainstacklabs.com",

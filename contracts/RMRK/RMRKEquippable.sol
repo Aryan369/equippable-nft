@@ -347,9 +347,11 @@ contract RMRKEquippable is RMRKNesting, IRMRKEquippable {
         _requireMinted(tokenId);
         // TODO: Discuss is this is the best default path.
         // We could return empty string so it returns something if a token has no resources, but it might hide erros
-        if (!(index < _activeResources[tokenId].length)){
-            // revert RMRKIndexOutOfRange();
+        if(_activeResources[tokenId].length == 0){
             return _fallbackURI;
+        }
+        else if (!(index < _activeResources[tokenId].length)){
+            revert RMRKIndexOutOfRange();
         }
         else{
             uint64 activeResId = _activeResources[tokenId][index];
