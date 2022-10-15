@@ -15,8 +15,6 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     uint256 public maxMintAmountPerTx = 20;
     uint256 private RESERVED_NFT = 33;
 
-    bool public reservedNFTMinted;
-
     IWhitelistUtils public whitelistUtils;
 
     constructor(
@@ -32,26 +30,19 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
 
     modifier mintReq (uint256 numberOfTokens) {
         if(whitelistUtils != IWhitelistUtils(address(0))) {require(!IWhitelistUtils(whitelistUtils).isPresaleOn(), "Presale is going on");}
-        if(!reservedNFTMinted){
-            require((totalSupply() + numberOfTokens) <= (maxSupply() - RESERVED_NFT), "Not enough tokens left.");
-        }
-        else{
-            require((totalSupply() + numberOfTokens) <= maxSupply(), "Not enough tokens left.");
-        }
+        require((totalSupply() + numberOfTokens) <= maxSupply(), "Not enough tokens left.");
         require(numberOfTokens <= maxMintAmountPerTx && numberOfTokens > 0, "Max mint amount per transaction is 20.");   
         require(msg.value >= (mintPrice() * numberOfTokens), "Not enough ether sent.");
         _;
     }
 
     function reserveNFT() external onlyOwner {
-    //   if (reservedNFTMinted) revert ("Reserved NFTs already minted");
       for(uint i = 0; i< RESERVED_NFT;) {
           _tokenIdTracker.increment();
           uint256 currentToken = _tokenIdTracker.current();
           _safeMint(owner(), currentToken);
           unchecked {++i;}
       }
-      reservedNFTMinted = true;
     }
 
     function mint(uint256 numberOfTokens) external payable saleIsOpen mintReq(numberOfTokens) nonReentrant {
