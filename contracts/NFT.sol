@@ -37,6 +37,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     }
 
     function reserveNFT() external onlyOwner {
+      require((totalSupply() + RESERVED_NFT) <= maxSupply(), "Not enough tokens left.");
       for(uint i = 0; i< RESERVED_NFT;) {
           _tokenIdTracker.increment();
           uint256 currentToken = _tokenIdTracker.current();
