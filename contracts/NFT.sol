@@ -6,6 +6,7 @@ import "./Utils/MintingUtils.sol";
 import "./Utils/IWhitelistUtils.sol";
 import "./RMRK/RMRKEquippable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+// @dev 
 import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKEquipRenderUtils.sol";
 /* import "hardhat/console.sol"; */
 
