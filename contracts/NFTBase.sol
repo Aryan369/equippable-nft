@@ -63,9 +63,7 @@ contract NFTBase is Ownable, RMRKBaseStorage {
         for (uint256 i; i < numParts; ) {
             uint64 partId = partIds[i];
             _setEquippableAddresses(partId, equippableAddresses);
-            unchecked {
-                ++i;
-            }
+            unchecked {++i;}
         }
     }
 
@@ -73,7 +71,27 @@ contract NFTBase is Ownable, RMRKBaseStorage {
         _setEquippableToAll(partId);
     }
 
+    function setEquippableToAllToParts(uint64[] calldata partIds) external onlyOwner {
+        uint256 numParts = partIds.length;
+
+        for (uint256 i; i < numParts;){
+            uint64 partId = partIds[i];
+            _setEquippableToAll(partId);
+            unchecked{++i;}
+        }
+    }
+
     function resetEquippableAddresses(uint64 partId) external onlyOwner {
         _resetEquippableAddresses(partId);
+    }
+
+    function resetEquippableAddressesOfParts(uint64[] calldata partIds) external onlyOwner {
+        uint256 numParts = partIds.length;
+
+        for (uint256 i; i < numParts;){
+            uint64 partId = partIds[i];
+            _resetEquippableAddresses(partId);
+            unchecked{++i;}
+        }
     }
 }
