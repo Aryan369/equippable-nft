@@ -52,6 +52,10 @@ contract MintingUtils is Ownable {
         _withdraw(to, amount);
     }
 
+    function withdrawAll(address to) external onlyOwner {
+        _withdraw(to, address(this).balance);
+    }
+
     function _withdraw(address _address, uint256 _amount) private {
         (bool success, ) = _address.call{value: _amount}("");
         require(success, "Transfer failed.");
