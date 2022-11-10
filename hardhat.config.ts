@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+require("hardhat-gas-reporter");
 require ("dotenv").config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
@@ -33,7 +34,15 @@ const config: HardhatUserConfig = {
       accounts: [PRIVATE_KEY],
       gas: 10000000
     }
-  }
+  },
+  // gasReporter: {
+  //   outputFile: "gas-report.txt",
+  //   enabled: process.env.REPORT_GAS !== undefined,
+  //   currency: "USD",
+  //   noColors: true,
+  //   coinmarketcap: process.env.COIN_MARKETCAP_API_KEY || "",
+  //   token: "ETH"
+  // }
 };
 
 export default config;
