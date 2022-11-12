@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.15;
 
-import "@rmrk-team/evm-contracts/contracts/RMRK/base/RMRKBaseStorage.sol";
+import "./RMRK/RMRKBaseStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTBase is Ownable, RMRKBaseStorage {
@@ -93,5 +93,9 @@ contract NFTBase is Ownable, RMRKBaseStorage {
             _resetEquippableAddresses(partId);
             unchecked{++i;}
         }
+    }
+
+    function setZIndex(uint64[] memory partIds, uint8[] memory zIndexes) external onlyOwner {
+        _setZIndex(partIds, zIndexes);
     }
 }
