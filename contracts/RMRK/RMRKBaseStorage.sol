@@ -19,6 +19,8 @@ error RMRKArrayLengthMismatched();
 contract RMRKBaseStorage is IRMRKBaseStorage {
     using Address for address;
 
+    event SetZIndex(uint64[] partId, uint8[] zIndexes);
+
     /**
      * @dev Mapping of uint64 partId to IRMRKBaseStorage Part struct
      */
@@ -270,5 +272,7 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
             _parts[partIds[i]].z = zIndexes[i];
             unchecked{++i;}
         }
+
+        emit SetZIndex(partIds, zIndexes);
     }
 }
