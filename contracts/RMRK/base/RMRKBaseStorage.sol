@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.16;
 
-import "@rmrk-team/evm-contracts/contracts/RMRK/base/IRMRKBaseStorage.sol";
+import "./IRMRKBaseStorage.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "./library/RMRKErrors.sol";
+import "../library/RMRKErrors.sol";
 
 // import "hardhat/console.sol";
 
@@ -200,7 +200,7 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
         uint64[] memory partIds,
         uint8[] memory zIndexes
     ) internal {
-        if (partIds.length != zIndexes.length) revert RMRKArrayLengthMismatched();
+        if (partIds.length != zIndexes.length) revert RMRKBadPriorityListLength();
         if (partIds.length <= 0) revert RMRKZeroLengthIdsPassed();
         if (zIndexes.length <= 0) revert RMRKZeroLengthIdsPassed();
 

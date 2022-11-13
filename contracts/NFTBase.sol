@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.15;
 
-import "./RMRK/RMRKBaseStorage.sol";
+import "./RMRK/base/RMRKBaseStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTBase is Ownable, RMRKBaseStorage {
     
-    constructor(string memory symbol_, string memory type__)
-        RMRKBaseStorage(symbol_, type__)
+    constructor(string memory metadataURI, string memory type__)
+        RMRKBaseStorage(metadataURI, type__)
     {}
 
     function addPart(IntakeStruct calldata intakeStruct)
