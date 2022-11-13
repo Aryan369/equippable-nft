@@ -4,14 +4,15 @@ pragma solidity ^0.8.16;
 
 import "./Utils/MintingUtils.sol";
 import "./Utils/IWhitelistUtils.sol";
-import "./RMRK/RMRKEquippable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./RMRK/equippable/RMRKEquippable.sol";
 // @dev 
-import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKEquipRenderUtils.sol";
+import "./RMRK/utils/RMRKEquipRenderUtils.sol";
 /* import "hardhat/console.sol"; */
 
-contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
+contract NFT is Ownable, MintingUtils, RMRKEquippable {
     using Counters for Counters.Counter;
+
+    uint256 private _totalResources;
 
     uint256 public maxMintAmountPerTx = 20;
     uint256 private RESERVED_NFT = 33;
@@ -25,7 +26,7 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
         uint256 mintPrice,
         string memory _fallbackURI
     ) RMRKEquippable(name, symbol) MintingUtils(maxSupply, mintPrice) {
-        _setFallbackURI(_fallbackURI);
+        setFallbackURI(_fallbackURI);
     }
     // --------------- MINT -------------------------- //
 
@@ -85,38 +86,65 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     }
 
     // ------------------------------------------------ //
-
-    //update for reentrancy
-    function burn(uint256 tokenId) public onlyApprovedOrDirectOwner(tokenId) {
-        _burn(tokenId);
+    
+    // ---------------- TRANSFER UTILS ------------------------- //
+    function transfer(address to, uint256 tokenId) public virtual {
+        transferFrom(_msgSender(), to, tokenId);
     }
 
+    function nestTransfer(
+        address to,
+        uint256 tokenId,
+        uint256 destinationId
+    ) public virtual {
+        nestTransferFrom(_msgSender(), to, tokenId, destinationId);
+    }
+    
     // ---------------- RESOURCES ------------------------- //
 
     function addResourceToToken(
         uint256 tokenId,
         uint64 resourceId,
         uint64 overwrites
-    ) external onlyOwner {
-        // This reverts if token does not exist:
-        ownerOf(tokenId);
+    ) public virtual onlyOwner {
         _addResourceToToken(tokenId, resourceId, overwrites);
     }
 
     function addResourceEntry(
-        ExtendedResource calldata resource,
-        uint64[] calldata fixedPartIds,
-        uint64[] calldata slotPartIds
-    ) external onlyOwner {
-        _addResourceEntry(resource, fixedPartIds, slotPartIds);
+        uint64 equippableGroupId,
+        address baseAddress,
+        string memory metadataURI,
+        uint64[] memory fixedPartIds,
+        uint64[] memory slotPartIds
+    ) public virtual onlyOwner returns (uint256) {
+        unchecked {
+            _totalResources += 1;
+        }
+        _addResourceEntry(
+            uint64(_totalResources),
+            equippableGroupId,
+            baseAddress,
+            metadataURI,
+            fixedPartIds,
+            slotPartIds
+        );
+        return _totalResources;
     }
 
-    function setValidParentRefId(
-        uint64 refId,
+    function setValidParentForEquippableGroup(
+        uint64 equippableGroupId,
         address parentAddress,
         uint64 partId
-    ) external onlyOwner {
-        _setValidParentRefId(refId, parentAddress, partId);
+    ) public virtual onlyOwner {
+        _setValidParentForEquippableGroup(
+            equippableGroupId,
+            parentAddress,
+            partId
+        );
+    }
+
+    function totalResources() public view virtual returns (uint256) {
+        return _totalResources;
     }
 
     // ------------------------------------------------ //
@@ -149,6 +177,15 @@ contract NFT is Ownable, MintingUtils, RMRKEquippable, ReentrancyGuard {
     }
 
     // ------------------------------------------------ //
+
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        virtual
+        returns (string memory)
+    {
+        return getResourceMetadata(_tokenId, getActiveResourcePriorities(_tokenId)[0]);
+    }
 
     // ---------------- WHITELIST UTILS ------------------------- //
     function setWhitelistUtils(IWhitelistUtils _address) public onlyOwner{
