@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.16;
 
 import "@rmrk-team/evm-contracts/contracts/RMRK/base/IRMRKBaseStorage.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "./library/RMRKErrors.sol";
+
 // import "hardhat/console.sol";
 
-error RMRKPartAlreadyExists();
-error RMRKPartDoesNotExist();
-error RMRKPartIsNotSlot();
-error RMRKZeroLengthIdsPassed();
-error RMRKBadConfig();
-error RMRKArrayLengthMismatched();
-
 /**
- * @dev Base storage contract for RMRK equippable module.
+ * @title RMRKBaseStorage
+ * @author RMRK team
+ * @notice Base storage contract for RMRK equippable module.
  */
 contract RMRKBaseStorage is IRMRKBaseStorage {
     using Address for address;
@@ -22,49 +19,44 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
     event SetZIndex(uint64[] partId, uint8[] zIndexes);
 
     /**
-     * @dev Mapping of uint64 partId to IRMRKBaseStorage Part struct
+     * @dev Mapping of uint64 `partId` to IRMRKBaseStorage `Part` struct
      */
     mapping(uint64 => Part) private _parts;
 
     /**
-     * @dev Mapping of uint64 partId to flag to set partd to be equippable by any
+     * @dev Mapping of uint64 `partId` to boolean flag, indicating that a given `Part` can be equippable by any address
      */
     mapping(uint64 => bool) private _isEquippableToAll;
 
     uint64[] private _partIds;
 
-    string private _symbol;
+    string private _metadataURI;
     string private _type;
 
-    //Inquire about using an index instead of hashed ID to prevent any chance of collision
-    //Consider moving to interface
-    //TODO: Doc this struct, put JSON intake format in comments here
-    struct IntakeStruct {
-        uint64 partId;
-        Part part;
-    }
-
-    constructor(string memory symbol_, string memory type__) {
-        _symbol = symbol_;
-        _type = type__;
+    constructor(string memory metadataURI, string memory type_) {
+        _metadataURI = metadataURI;
+        _type = type_;
     }
 
     /**
-     * @dev Throws if the partId is uninitailized or is Fixed.
+     * @notice Used to limit execution of functions intended for the `Slot` parts to only execute when used with such
+     *  parts.
+     * @dev Reverts execution of a function if the part with associated `partId` is uninitailized or is `Fixed`.
+     * @param partId ID of the part that we want the function to interact with
      */
     modifier onlySlot(uint64 partId) {
         _onlySlot(partId);
         _;
     }
 
-    function _onlySlot(uint64 partId) internal view {
+    function _onlySlot(uint64 partId) private view {
         ItemType itemType = _parts[partId].itemType;
         if (itemType == ItemType.None) revert RMRKPartDoesNotExist();
         if (itemType == ItemType.Fixed) revert RMRKPartIsNotSlot();
     }
 
     /**
-     * @dev See {IERC165-supportsInterface}.
+     * @inheritdoc IERC165
      */
     function supportsInterface(bytes4 interfaceId)
         public
@@ -78,29 +70,29 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
     }
 
     /**
-     * @dev Returns symbol of associated collection
-     * @return string base contract symbol
+     * @notice Used to return the metadata URI of the associated base.
+     * @return string Base metadata URI
      */
-    function symbol() external view returns (string memory) {
-        return _symbol;
+    function getMetadataURI() external view returns (string memory) {
+        return _metadataURI;
     }
 
     /**
-     * @dev Returns type of data of associated base
-     * @return string data type
+     * @notice Used to return the `itemType` of the associated base
+     * @return string `itemType` of the associated base
      */
-    function type_() external view returns (string memory) {
+    function getType() external view returns (string memory) {
         return _type;
     }
 
     /**
-     * @dev Private helper function which writes n base item entries to storage.
-     * Delegates to { _addPart } below.
-     * @param partIntake array of structs of type IntakeStruct, which consists of partId and a nested part struct.
+     * @dev Internal helper function that adds `Part` entries to storage.
+     * @dev Delegates to { _addPart } below.
+     * @param partIntake An array of `IntakeStruct` structs, consisting of `partId` and a nested `Part` struct
      */
     function _addPartList(IntakeStruct[] calldata partIntake) internal {
         uint256 len = partIntake.length;
-        for (uint256 i = 0; i < len; ) {
+        for (uint256 i; i < len; ) {
             _addPart(partIntake[i]);
             unchecked {
                 ++i;
@@ -109,14 +101,15 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
     }
 
     /**
-     * @dev Private function which writes a single base item entry to storage.
-     * @param partIntake struct of type IntakeStruct, which consists of partId and a nested part struct.
+     * @dev Internal function that adds a single `Part` to storage.
+     * @param partIntake `IntakeStruct` struct consisting of `partId` and a nested `Part` struct
      *
      */
     function _addPart(IntakeStruct calldata partIntake) internal {
         uint64 partId = partIntake.partId;
         Part memory part = partIntake.part;
 
+        if (partId == uint64(0)) revert RMRKIdZeroForbidden();
         if (_parts[partId].itemType != ItemType.None)
             revert RMRKPartAlreadyExists();
         if (part.itemType == ItemType.None) revert RMRKBadConfig();
@@ -136,7 +129,10 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
     }
 
     /**
-     * @dev Function which adds a number of equippableAddresses to a single base entry.
+     * @dev Internal function used to add multiple `equippableAddresses` to a single base entry.
+     * @dev Can only be called on `Slot` type of `Part`s.
+     * @param partId ID of the `Part` that we are adding the equippable addresses to
+     * @param equippableAddresses An array of addresses that can be equipped into the `Part` associated with the `partId`
      */
     function _addEquippableAddresses(
         uint64 partId,
@@ -151,14 +147,17 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
                 ++i;
             }
         }
-        _isEquippableToAll[partId] = false;
+        delete _isEquippableToAll[partId];
 
         emit AddedEquippables(partId, equippableAddresses);
     }
 
     /**
-     * @dev Public function which sets a number of equippableAddresses, overwrites existing addresses.
-     *
+     * @dev Internal function used to set the new list of `equippableAddresses`.
+     * @dev Overwrites existing `equippableAddresses`.
+     * @dev Can only be called on `Slot` type of `Part`s.
+     * @param partId ID of the `Part`s that we are overwiting the `equippableAddresses` for
+     * @param equippableAddresses A full array of addresses that can be equipped into this `Part`
      */
     function _setEquippableAddresses(
         uint64 partId,
@@ -166,98 +165,35 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
     ) internal onlySlot(partId) {
         if (equippableAddresses.length <= 0) revert RMRKZeroLengthIdsPassed();
         _parts[partId].equippable = equippableAddresses;
-        _isEquippableToAll[partId] = false;
+        delete _isEquippableToAll[partId];
 
         emit SetEquippables(partId, equippableAddresses);
     }
 
     /**
-     * @dev Public function which removes all equippableAddresses for a partId.
-     *
+     * @dev Internal function used to remove all of the `equippableAddresses` for a `Part` associated with the `partId`.
+     * @dev Can only be called on `Slot` type of `Part`s.
+     * @param partId ID of the part that we are clearing the `equippableAddresses` from
      */
     function _resetEquippableAddresses(uint64 partId)
         internal
         onlySlot(partId)
     {
         delete _parts[partId].equippable;
-        _isEquippableToAll[partId] = false;
+        delete _isEquippableToAll[partId];
 
         emit SetEquippables(partId, new address[](0));
     }
 
     /**
-     * @dev Sets the isEquippableToAll flag to true, meaning that any collection may equip this partId.
+     * @dev Sets the isEquippableToAll flag to true, meaning that any collection may be equipped into the `Part` with this
+     *  `partId`.
+     * @dev Can only be called on `Slot` type of `Part`s.
+     * @param partId ID of the `Part` that we are setting as equippable by any address
      */
     function _setEquippableToAll(uint64 partId) internal onlySlot(partId) {
         _isEquippableToAll[partId] = true;
         emit SetEquippableToAll(partId);
-    }
-
-    /**
-     * @dev Returns true if part is equippable to all.
-     */
-    function checkIsEquippableToAll(uint64 partId)
-        external
-        view
-        returns (bool)
-    {
-        return _isEquippableToAll[partId];
-    }
-
-    /**
-     * @dev Returns true if a collection may equip resource with partId.
-     */
-    function checkIsEquippable(uint64 partId, address targetAddress)
-        external
-        view
-        returns (bool isEquippable)
-    {
-        // If this is equippable to all, we're good
-        isEquippable = _isEquippableToAll[partId];
-
-        // Otherwise, must check against each of the equippable for the part
-        if (!isEquippable && _parts[partId].itemType == ItemType.Slot) {
-            address[] memory equippable = _parts[partId].equippable;
-            uint256 len = equippable.length;
-            for (uint256 i = 0; i < len; ) {
-                if (targetAddress == equippable[i]) {
-                    isEquippable = true;
-                    break;
-                }
-                unchecked {
-                    ++i;
-                }
-            }
-        }
-    }
-
-    /**
-    @dev Getter for a single base part.
-    */
-    function getPart(uint64 partId) external view returns (Part memory) {
-        return (_parts[partId]);
-    }
-
-    /**
-    @dev Getter for multiple base item entries.
-    */
-    function getParts(uint64[] calldata partIds)
-        external
-        view
-        returns (Part[] memory)
-    {
-        uint256 numParts = partIds.length;
-        Part[] memory parts = new Part[](numParts);
-
-        for (uint256 i; i < numParts; ) {
-            uint64 partId = partIds[i];
-            parts[i] = _parts[partId];
-            unchecked {
-                ++i;
-            }
-        }
-
-        return parts;
     }
 
     function _setZIndex(
@@ -274,5 +210,80 @@ contract RMRKBaseStorage is IRMRKBaseStorage {
         }
 
         emit SetZIndex(partIds, zIndexes);
+    }
+
+    /**
+     * @notice Used to check if the part is equippable by all addresses.
+     * @dev Returns true if part is equippable to all.
+     * @param partId ID of the part that we are checking
+     * @return bool The status indicating whether the part with `partId` can be equipped by any address or not
+     */
+    function checkIsEquippableToAll(uint64 partId) public view returns (bool) {
+        return _isEquippableToAll[partId];
+    }
+
+    /**
+     * @notice Used to check whether the given address is allowed to equip the desired `Part`
+     * @dev Returns true if a collection may equip resource with `partId`.
+     * @param partId The ID of the part that we are checking
+     * @param targetAddress The address that we are checking for whether the part can be equipped into it or not
+     * @return bool The status indicating whether the `targetAddress` can be equipped into `Part` with `partId` or not
+     */
+    function checkIsEquippable(uint64 partId, address targetAddress)
+        public
+        view
+        returns (bool)
+    {
+        // If this is equippable to all, we're good
+        bool isEquippable = _isEquippableToAll[partId];
+
+        // Otherwise, must check against each of the equippable for the part
+        if (!isEquippable && _parts[partId].itemType == ItemType.Slot) {
+            address[] memory equippable = _parts[partId].equippable;
+            uint256 len = equippable.length;
+            for (uint256 i; i < len; ) {
+                if (targetAddress == equippable[i]) {
+                    isEquippable = true;
+                    break;
+                }
+                unchecked {
+                    ++i;
+                }
+            }
+        }
+        return isEquippable;
+    }
+
+    /**
+     * @notice Used to retrieve a `Part` with id `partId`
+     * @param partId ID of the part that we are retrieving
+     * @return struct The `Part` struct associated with given `partId`
+     */
+    function getPart(uint64 partId) public view returns (Part memory) {
+        return (_parts[partId]);
+    }
+
+    /**
+     * @notice Used to retrieve multiple parts at the same time.
+     * @param partIds An array of part IDs that we want to retrieve
+     * @return struct An array of `Part` structs associated with given `partIds`
+     */
+    function getParts(uint64[] calldata partIds)
+        public
+        view
+        returns (Part[] memory)
+    {
+        uint256 numParts = partIds.length;
+        Part[] memory parts = new Part[](numParts);
+
+        for (uint256 i; i < numParts; ) {
+            uint64 partId = partIds[i];
+            parts[i] = _parts[partId];
+            unchecked {
+                ++i;
+            }
+        }
+
+        return parts;
     }
 }
