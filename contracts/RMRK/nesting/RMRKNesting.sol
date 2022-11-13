@@ -1050,5 +1050,10 @@ contract RMRKNesting is Context, IERC165, IERC721, IRMRKNesting, RMRKCore {
     function _removeChildByIndex(Child[] storage array, uint256 index) private {
         array[index] = array[array.length - 1];
         array.pop();
+
+        // for(uint i = index; i < array.length-1; i++){
+        //     array[i] = array[i+1];      
+        // }
+        // array.pop();
     }
 }

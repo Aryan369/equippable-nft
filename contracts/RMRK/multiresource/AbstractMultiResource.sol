@@ -184,7 +184,8 @@ abstract contract AbstractMultiResource is Context, IRMRKMultiResource {
             revert RMRKUnexpectedResourceId();
         _beforeAcceptResource(tokenId, index, resourceId);
 
-        _pendingResources[tokenId].removeItemByIndex(index);
+        // _pendingResources[tokenId].removeItemByIndex(index);
+        _removeItemByIndex(_pendingResources[tokenId], index);
 
         uint64 overwrite = _resourceOverwrites[tokenId][resourceId];
         if (overwrite != uint64(0)) {
@@ -219,7 +220,8 @@ abstract contract AbstractMultiResource is Context, IRMRKMultiResource {
             revert RMRKUnexpectedResourceId();
 
         _beforeRejectResource(tokenId, index, resourceId);
-        _pendingResources[tokenId].removeItemByIndex(index);
+        // _pendingResources[tokenId].removeItemByIndex(index);
+        _removeItemByIndex(_pendingResources[tokenId], index);
         delete _tokenResources[tokenId][resourceId];
         delete _resourceOverwrites[tokenId][resourceId];
 
@@ -393,4 +395,17 @@ abstract contract AbstractMultiResource is Context, IRMRKMultiResource {
         internal
         virtual
     {}
+
+    //HELPERS
+
+    // For storage array, callers must check valid length
+    function _removeItemByIndex(uint64[] storage array, uint256 index) private {
+        // array[index] = array[array.length - 1];
+        // array.pop();
+
+        for(uint i = index; i < array.length-1; i++){
+            array[i] = array[i+1];      
+        }
+        array.pop();
+    }
 }
