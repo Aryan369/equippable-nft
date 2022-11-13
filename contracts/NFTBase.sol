@@ -12,14 +12,16 @@ contract NFTBase is Ownable, RMRKBaseStorage {
     {}
 
     function addPart(IntakeStruct calldata intakeStruct)
-        external
+        public
+        virtual
         onlyOwner
     {
         _addPart(intakeStruct);
     }
 
     function addPartList(IntakeStruct[] calldata intakeStructs)
-        external
+        public
+        virtual
         onlyOwner
     {
         _addPartList(intakeStructs);
@@ -28,14 +30,14 @@ contract NFTBase is Ownable, RMRKBaseStorage {
     function addEquippableAddresses(
         uint64 partId,
         address[] memory equippableAddresses
-    ) external onlyOwner {
+    ) public virtual onlyOwner {
         _addEquippableAddresses(partId, equippableAddresses);
     }
 
     function addEquippableAddressesToParts(
         uint64[] calldata partIds,
         address[] memory equippableAddresses
-    ) external onlyOwner {
+    ) public virtual onlyOwner {
         uint256 numParts = partIds.length;
 
         for (uint256 i; i < numParts; ) {
@@ -50,14 +52,14 @@ contract NFTBase is Ownable, RMRKBaseStorage {
     function setEquippableAddresses(
         uint64 partId,
         address[] memory equippableAddresses
-    ) external onlyOwner {
+    ) public virtual onlyOwner {
         _setEquippableAddresses(partId, equippableAddresses);
     }
 
     function setEquippableAddressesToParts(
         uint64[] calldata partIds,
         address[] memory equippableAddresses
-    ) external onlyOwner {
+    ) public virtual onlyOwner {
         uint256 numParts = partIds.length;
 
         for (uint256 i; i < numParts; ) {
@@ -67,11 +69,11 @@ contract NFTBase is Ownable, RMRKBaseStorage {
         }
     }
 
-    function setEquippableToAll(uint64 partId) external onlyOwner {
+    function setEquippableToAll(uint64 partId) public virtual onlyOwner {
         _setEquippableToAll(partId);
     }
 
-    function setEquippableToAllToParts(uint64[] calldata partIds) external onlyOwner {
+    function setEquippableToAllToParts(uint64[] calldata partIds) public virtual onlyOwner {
         uint256 numParts = partIds.length;
 
         for (uint256 i; i < numParts;){
@@ -81,11 +83,11 @@ contract NFTBase is Ownable, RMRKBaseStorage {
         }
     }
 
-    function resetEquippableAddresses(uint64 partId) external onlyOwner {
+    function resetEquippableAddresses(uint64 partId) public virtual onlyOwner {
         _resetEquippableAddresses(partId);
     }
 
-    function resetEquippableAddressesOfParts(uint64[] calldata partIds) external onlyOwner {
+    function resetEquippableAddressesOfParts(uint64[] calldata partIds) public virtual onlyOwner {
         uint256 numParts = partIds.length;
 
         for (uint256 i; i < numParts;){
@@ -95,7 +97,7 @@ contract NFTBase is Ownable, RMRKBaseStorage {
         }
     }
 
-    function setZIndex(uint64[] memory partIds, uint8[] memory zIndexes) external onlyOwner {
+    function setZIndex(uint64[] memory partIds, uint8[] memory zIndexes) public virtual onlyOwner {
         _setZIndex(partIds, zIndexes);
     }
 }
