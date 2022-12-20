@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
-    "@rmrk-team/evm-contracts": "^0.5.2",
+    "@rmrk-team/evm-contracts": "^0.21.1",
     "dotenv": "^16.0.2"
   },
   "devDependencies": {

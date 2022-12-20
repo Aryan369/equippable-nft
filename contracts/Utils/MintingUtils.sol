@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.16;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
-pragma solidity ^0.8.15;
 
 contract MintingUtils is Ownable {
     using Counters for Counters.Counter;
@@ -48,8 +48,12 @@ contract MintingUtils is Ownable {
         _paused = _state;
     }
 
-    function withdraw(address to, uint256 amount) external onlyOwner {
+    function withdrawRaised(address to, uint256 amount) external onlyOwner {
         _withdraw(to, amount);
+    }
+
+    function withdrawAll(address to) external onlyOwner {
+        _withdraw(to, address(this).balance);
     }
 
     function _withdraw(address _address, uint256 _amount) private {
