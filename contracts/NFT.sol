@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.16;
 
-import "./Utils/MintingUtils.sol";
-import "./Utils/IWhitelistUtils.sol";
+import "./utils/MintingUtils.sol";
+import "./utils/IWhitelistUtils.sol";
 import "./extension/Royalties.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/equippable/RMRKEquippable.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKTokenURI.sol";
