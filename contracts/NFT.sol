@@ -48,13 +48,13 @@ contract NFT is
     }
 
     function reserveNFT() external onlyOwner {
-        // require((totalSupply() + RESERVED_NFT) < maxSupply() + 1, "Not enough tokens left.");
-        // for(uint i = 0; i< RESERVED_NFT;) {
-        //     _tokenIdTracker.increment();
-        //     uint256 currentToken = _tokenIdTracker.current();
-        //     _safeMint(owner(), currentToken, "");
-        //     unchecked {++i;}
-        // }
+        require((totalSupply() + RESERVED_NFT) < maxSupply() + 1, "Not enough tokens left.");
+        for(uint i = 0; i< RESERVED_NFT;) {
+            _tokenIdTracker.increment();
+            uint256 currentToken = _tokenIdTracker.current();
+            _safeMint(owner(), currentToken, "");
+            unchecked {++i;}
+        }
     }
 
     function mint(address to, uint256 numberOfTokens) external payable saleIsOpen mintReq(numberOfTokens) nonReentrant {
