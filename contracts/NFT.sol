@@ -4,8 +4,8 @@ pragma solidity ^0.8.16;
 
 import "./Utils/MintingUtils.sol";
 import "./Utils/IWhitelistUtils.sol";
+import "./extension/Royalties.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/equippable/RMRKEquippable.sol";
-import "@rmrk-team/evm-contracts/contracts/RMRK/extension/RMRKRoyalties.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKTokenURI.sol";
 import "@rmrk-team/evm-contracts/contracts/implementations/IRMRKInitData.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKEquipRenderUtils.sol";
@@ -15,7 +15,7 @@ contract NFT is
     Ownable, 
     IRMRKInitData,
     MintingUtils,
-    RMRKRoyalties,
+    Royalties,
     RMRKTokenURI,
     RMRKEquippable {
     using Counters for Counters.Counter;
@@ -35,7 +35,7 @@ contract NFT is
     ) 
     RMRKEquippable(name_, symbol_) 
     MintingUtils(data.maxSupply, data.pricePerMint)
-    RMRKRoyalties(data.royaltyRecipient, data.royaltyPercentageBps) //1bps = 0.01%
+    Royalties(data.royaltyRecipient, data.royaltyPercentageBps) //1bps = 0.01%
     RMRKTokenURI(tokenURI_, data.tokenUriIsEnumerable)
     {}
     // --------------- MINT -------------------------- //
@@ -170,9 +170,11 @@ contract NFT is
 
     // ------------------ ROYALTY ----------------------- //
 
-    function updateRoyaltyRecipient(
-        address newRoyaltyRecipient
-    ) public virtual override onlyOwner {
+    function setRoyaltyPercentage(uint256 newRoyaltyPercentageBps) public onlyOwner {
+        _setRoyaltyPercentage(newRoyaltyPercentageBps);
+    }
+
+    function updateRoyaltyRecipient(address newRoyaltyRecipient) public virtual override onlyOwner {
         _setRoyaltyRecipient(newRoyaltyRecipient);
     }
 
