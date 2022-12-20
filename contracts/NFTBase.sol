@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.15;
 
-import "./RMRK/Base/RMRKBaseStorage.sol";
+import "./RMRK/base/RMRKBaseStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTBase is Ownable, RMRKBaseStorage {
