@@ -1,42 +1,35 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.15;
 
-import "./RMRK/base/RMRKBaseStorage.sol";
+import "./RMRK/Base/RMRKBaseStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTBase is Ownable, RMRKBaseStorage {
     
-    constructor(string memory metadataURI, string memory type__)
-        RMRKBaseStorage(metadataURI, type__)
-    {}
+    constructor(
+        string memory metadataURI, 
+        string memory type__
+    ) RMRKBaseStorage(metadataURI, type__) {}
 
-    function addPart(IntakeStruct calldata intakeStruct)
-        public
-        virtual
-        onlyOwner
-    {
+    function addPart(IntakeStruct calldata intakeStruct) public virtual onlyOwner {
         _addPart(intakeStruct);
     }
 
-    function addPartList(IntakeStruct[] calldata intakeStructs)
-        public
-        virtual
-        onlyOwner
-    {
+    function addPartList(IntakeStruct[] calldata intakeStructs)public virtual onlyOwner {
         _addPartList(intakeStructs);
     }
 
     function addEquippableAddresses(
         uint64 partId,
-        address[] memory equippableAddresses
+        address[] calldata equippableAddresses
     ) public virtual onlyOwner {
         _addEquippableAddresses(partId, equippableAddresses);
     }
 
     function addEquippableAddressesToParts(
         uint64[] calldata partIds,
-        address[] memory equippableAddresses
+        address[] calldata equippableAddresses
     ) public virtual onlyOwner {
         uint256 numParts = partIds.length;
 
@@ -51,14 +44,14 @@ contract NFTBase is Ownable, RMRKBaseStorage {
 
     function setEquippableAddresses(
         uint64 partId,
-        address[] memory equippableAddresses
+        address[] calldata equippableAddresses
     ) public virtual onlyOwner {
         _setEquippableAddresses(partId, equippableAddresses);
     }
 
     function setEquippableAddressesToParts(
         uint64[] calldata partIds,
-        address[] memory equippableAddresses
+        address[] calldata equippableAddresses
     ) public virtual onlyOwner {
         uint256 numParts = partIds.length;
 
