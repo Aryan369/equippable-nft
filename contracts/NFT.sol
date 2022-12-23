@@ -108,6 +108,13 @@ contract NFT is
     // ) public virtual {
     //     nestTransferFrom(_msgSender(), to, tokenId, destinationId, "");
     // }
+
+    function setTokenURI(
+        string memory tokenURI_,
+        bool isEnumerable
+    ) internal virtual {
+        _setTokenURI(tokenURI_, isEnumerable);
+    }
     
     // ---------------- RESOURCES ------------------------- //
 
