@@ -3,7 +3,7 @@
 pragma solidity ^0.8.16;
 
 import "./utils/MintingUtils.sol";
-import "./utils/IWhitelistUtils.sol";
+import "./utils/whitelist/IWhitelistUtils.sol";
 import "./extension/Royalties.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/equippable/RMRKEquippable.sol";
 import "@rmrk-team/evm-contracts/contracts/RMRK/utils/RMRKTokenURI.sol";
@@ -115,6 +115,15 @@ contract NFT is
     ) internal virtual {
         _setTokenURI(tokenURI_, isEnumerable);
     }
+
+    function priorityAssetTokenURI(uint256 _tokenId)
+        public
+        view
+        virtual
+        returns (string memory)
+    {
+        return getAssetMetadata(_tokenId, getActiveAssetPriorities(_tokenId)[0]);
+    }
     
     // ---------------- RESOURCES ------------------------- //
 
@@ -213,15 +222,6 @@ contract NFT is
     }
 
     // ------------------------------------------------ //
-
-    function priorityAssetTokenURI(uint256 _tokenId)
-        public
-        view
-        virtual
-        returns (string memory)
-    {
-        return getAssetMetadata(_tokenId, getActiveAssetPriorities(_tokenId)[0]);
-    }
 
     // ---------------- WHITELIST UTILS ------------------------- //
     function setWhitelistUtils(IWhitelistUtils _address) public onlyOwner{
